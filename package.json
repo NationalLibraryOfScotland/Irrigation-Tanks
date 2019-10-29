@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel 74428283.html",
-    "build": "parcel build --experimental-scope-hoisting --public-url . 74428283.html"
+    "start": "parcel index.html",
+    "build": "parcel build --experimental-scope-hoisting --public-url . index.html"
   },
   "author": "",
   "license": "ISC",
