@@ -21,9 +21,9 @@ import {
   and as andFilter
 } from 'ol/format/filter';
 
-import {toPng} from 'html-to-image';
-import {toJpeg} from 'html-to-image';
-import {toCanvas} from 'html-to-image';
+// import {toPng} from 'html-to-image';
+// import {toJpeg} from 'html-to-image';
+// import {toCanvas} from 'html-to-image';
 
 var args;
 var currentZoom;
@@ -37,8 +37,86 @@ var loadFeatures;
 var features;
 var group;
 
+var printPDFNotinprocess;
+
+printPDFNotinprocess = true;
+
 var mapView;
 var overviewView = new View({});
+
+
+/**
+ * Renders a progress bar.
+ * @param {HTMLElement} el The target element.
+ * @constructor
+ */
+function Progress(el) {
+  this.el = el;
+  this.loading = 0;
+  this.loaded = 0;
+}
+
+
+/**
+ * Increment the count of loading tiles.
+ */
+Progress.prototype.addLoading = function() {
+  if (this.loading === 0) {
+    this.show();
+  }
+  ++this.loading;
+  this.update();
+};
+
+
+/**
+ * Increment the count of loaded tiles.
+ */
+Progress.prototype.addLoaded = function() {
+  var this_ = this;
+  setTimeout(function() {
+    ++this_.loaded;
+    this_.update();
+  }, 100);
+};
+
+
+/**
+ * Update the progress bar.
+ */
+Progress.prototype.update = function() {
+  var width = (this.loaded / this.loading * 100).toFixed(1) + '%';
+  this.el.style.width = width;
+  if (this.loading === this.loaded) {
+    this.loading = 0;
+    this.loaded = 0;
+    var this_ = this;
+    setTimeout(function() {
+      this_.hide();
+    }, 500);
+  }
+};
+
+
+/**
+ * Show the progress bar.
+ */
+Progress.prototype.show = function() {
+  this.el.style.visibility = 'visible';
+};
+
+
+/**
+ * Hide the progress bar.
+ */
+Progress.prototype.hide = function() {
+  if (this.loading === this.loaded) {
+    this.el.style.visibility = 'hidden';
+    this.el.style.width = 0;
+  }
+};
+
+var progress = new Progress(document.getElementById('progress'));
 
 var overviewMapControl = new OverviewMap({
   // see in overviewmap-custom.html to see the custom CSS used
@@ -57,29 +135,53 @@ var  map = new Map({
     }),
  notifyDiv = document.getElementById('iiif-notification');
 
-function refreshMap(url) {
-  fetch(url).then(function(response) {
+
+
+function refreshMaplocal(new_url2) {
+  fetch(new_url2).then(function(response) {
     response.json().then(function(imageInfo) {
       var options = new IIIFInfo(imageInfo).getTileSourceOptions();
       if (options === undefined || options.version === undefined) {
-	notifyDiv.textContent = 'Data seems to be no valid IIIF image information.';
+
+	notifyDiv.textContent = 'Data seems to be no valid IIIF image information.  Please contact maps@nls.uk citing this page URL.';
         return;
       }
       options.zDirection = -1;
       options.crossOrigin = 'anonymous';
+      options.tileSize = 256;
+      options.resolutions = [256, 128, 64, 32, 16, 8, 4, 2, 1];
       var iiifTileSource = new IIIF(options);
       var iiifTileSource2 = new IIIF(options);
 
       layer.setSource(iiifTileSource);
       layer2.setSource(iiifTileSource2);
 
+iiifTileSource.on('tileloadstart', function() {
+  progress.addLoading();
+  jQuery("#iiif-notification").show();
+  if (printPDFNotinprocess)
+  {
+  notifyDiv.textContent = 'Loading map...';
+  }
+});
+
+iiifTileSource.on('tileloadend', function() {
+  progress.addLoaded();
+  jQuery("#iiif-notification").hide();
+});
+iiifTileSource.on('tileloaderror', function() {
+  progress.addLoaded();
+  jQuery("#loadmessage").show();
+  notifyDiv.textContent = 'Image error - sorry';
+});
+
       var initialresolutions = iiifTileSource.getTileGrid().getResolutions();
       initialresolutions.push(0.5, 0.25, 0.125, 0.0625);
-
       map.setView(new View({
-//        resolutions: iiifTileSource.getTileGrid().getResolutions(),
-       resolutions: initialresolutions,
+        resolutions: iiifTileSource.getTileGrid().getResolutions(),
+//        resolutions: initialresolutions,
         extent: iiifTileSource.getTileGrid().getExtent(),
+	constrainRotation: false,
         constrainOnlyCenter: true
       }));
 	var hash = window.location.hash;
@@ -96,16 +198,123 @@ function refreshMap(url) {
 map.addControl(overviewMapControl);
       notifyDiv.textContent = '';
     }).catch(function(body) {
-      notifyDiv.textContent = 'Could not read image info json. ' + body;
+      notifyDiv.textContent = 'Could not read image info json. ' + body + ' Please contact maps@nls.uk citing this page URL.';
     });
    }).catch(function() {
-    notifyDiv.textContent = 'Could not read data from URL.';
+    notifyDiv.textContent = 'Could not read data from URL. Please contact maps@nls.uk citing this page URL.';
   });
+
+
+
+
+}
+
+
+
+
+function refreshMap(url) {
+  fetch(url).then(function(response) {
+    response.json().then(function(imageInfo) {
+      var options = new IIIFInfo(imageInfo).getTileSourceOptions();
+      if (options === undefined || options.version === undefined) {
+	notifyDiv.textContent = 'Data seems to be no valid IIIF image information.  Please contact maps@nls.uk citing this page URL.';
+        return;
+      }
+      options.zDirection = -1;
+      options.crossOrigin = 'anonymous';
+      options.tileSize = 256;
+      options.resolutions = [256, 128, 64, 32, 16, 8, 4, 2, 1];
+      var iiifTileSource = new IIIF(options);
+      var iiifTileSource2 = new IIIF(options);
+
+      layer.setSource(iiifTileSource);
+      layer2.setSource(iiifTileSource2);
+
+iiifTileSource.on('tileloadstart', function() {
+  progress.addLoading();
+  jQuery("#iiif-notification").show();
+  if (printPDFNotinprocess)
+  {
+  notifyDiv.textContent = 'Loading map...';
+  }
+});
+
+iiifTileSource.on('tileloadend', function() {
+  progress.addLoaded();
+  jQuery("#iiif-notification").hide();
+});
+iiifTileSource.on('tileloaderror', function() {
+//  progress.addLoaded();
+
+	if (url.includes("%2F"))
+		{
+		var new_url1 = url.replace('%2F','/');
+		}
+	else	
+		{
+		var new_url1 = url;
+		}
+	var new_url2 = url1.replace('map-view','mapview');
+	refreshMaplocal(new_url2);
+
+// jQuery("#loadmessage").show();
+//  notifyDiv.textContent = 'Image error - sorry';
+});
+
+      var initialresolutions = iiifTileSource.getTileGrid().getResolutions();
+      initialresolutions.push(0.5, 0.25, 0.125, 0.0625);
+      map.setView(new View({
+        resolutions: iiifTileSource.getTileGrid().getResolutions(),
+//        resolutions: initialresolutions,
+        extent: iiifTileSource.getTileGrid().getExtent(),
+	constrainRotation: false,
+        constrainOnlyCenter: true
+      }));
+	var hash = window.location.hash;
+	if (hash == '') {
+	      map.getView().fit(iiifTileSource.getTileGrid().getExtent());
+		}
+	else
+	{
+	getMapHash();
+	setZoomLatLon();
+	}
+      notifyDiv.textContent = '';
+
+map.addControl(overviewMapControl);
+      notifyDiv.textContent = '';
+    }).catch(function(body) {
+
+	if (url.includes("%2F"))
+		{
+		var new_url1 = url.replace('%2F','/');
+		}
+	else	
+		{
+		var new_url1 = url;
+		}
+	var new_url2 = new_url1.replace('map-view','mapview');
+	refreshMaplocal(new_url2);
+
+
+//      notifyDiv.textContent = 'Could not read image info json. ' + body + ' Please contact maps@nls.uk citing this page URL.';
+    });
+   }).catch(function() {
+    notifyDiv.textContent = 'Could not read data from URL. Please contact maps@nls.uk citing this page URL.';
+  });
+
+
+
 
 }
 
 
 refreshMap(url);
+
+
+document.getElementById('map').focus();
+
+jQuery("#showmaplocationinfo").hide();
 
 function getMapHash() {
 
@@ -198,11 +407,11 @@ map.on('moveend', function() {
 
 // export options for html-to-image.
 // See: https://github.com/bubkoo/html-to-image#options
-var exportOptions = {
-  filter: function(element) {
-    return !element.className || element.className.indexOf("ol-control") === -1;
-  }
-};
+// var exportOptions = {
+//  filter: function(element) {
+//    return !element.className || element.className.indexOf("ol-control") === -1;
+//  }
+// };
 
 
 
@@ -210,91 +419,76 @@ var exportButton = document.getElementById("export-pdf");
 
 if(exportButton){
 
-exportButton.addEventListener(
-  "click",
-  function() {
 
-    document.body.style.cursor = "progress";
+exportButton.addEventListener('click', function() {
 
-    var format = "a4";
-    var resolution = "150";
-    var dim = [297, 210];
-    var width = Math.round((dim[0] * resolution) / 25.4);
-    var height = Math.round((dim[1] * resolution) / 25.4);
+printPDFNotinprocess = false;
+
+  jQuery("#iiif-notification").show();
+
+	document.getElementById('iiif-notification').innerHTML = "Generating PDF - please wait..."; 
+		setTimeout( function(){
+			document.getElementById("iiif-notification").innerHTML = "";
+			jQuery("#iiif-notification").hide();
+
+	}, 1500); // delay 1000 ms
+
+map.removeControl(overviewMapControl);
+
+  exportButton.disabled = true;
+  document.body.style.cursor = 'progress';
+
+    var format = "a3";
+    var resolution = "72";
+    var dim = [420, 297];
+    var width = Math.round((420 * resolution) / 25.4);
+    var height = Math.round((297 * resolution) / 25.4);
     var size = map.getSize();
     var viewResolution = map.getView().getResolution();
 
-    function toPDF(image) {
-
-      var pdf = new jsPDF("landscape", undefined, format);
-      pdf.addImage(image, "JPEG", 0, 0, 297, 210);
-      pdf.save("map.pdf");
-      // Reset original map size
-      map.setSize(size);
-      map.getView().setResolution(viewResolution);
-      exportButton.disabled = false;
-      document.body.style.cursor = "auto";
-    }
-
-    map.once("rendercomplete", function() {
-      exportOptions.width = width;
-      exportOptions.height = height;
-      toJpeg(map.getViewport(), exportOptions)
-        .then(function(dataUrl) {
-          toPDF(dataUrl);
-        })
-        .catch(function(error) {
-          // if the browser is not compatible with htnl-to-image
-          // fall back to exporting only the layer canvases
-          var canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          var ctx = canvas.getContext("2d");
-
-          var layers = map.getViewport().querySelectorAll(".ol-layer");
-
-          for (var layer = 0; layer < layers.length; layer++) {
-            var layerCanvas = layers[layer].querySelector("canvas");
-            var matrix = JSON.parse(
-              layerCanvas.style.transform
-                .replace(/^\w+\(/, "[")
-                .replace(/\)$/, "]")
-            );
-            ctx.setTransform(
-              matrix[0],
-              matrix[1],
-              matrix[2],
-              matrix[3],
-              matrix[4],
-              matrix[5]
-            );
-            ctx.drawImage(
-              layerCanvas,
-              0,
-              0,
-              layerCanvas.width,
-              layerCanvas.height,
-              0,
-              0,
-              layerCanvas.width,
-              layerCanvas.height
-            );
-          }
-
-          toPDF(canvas);
-        });
+  map.once('rendercomplete', function() {
+    var mapCanvas = document.createElement('canvas');
+    mapCanvas.width = width;
+    mapCanvas.height = height;
+    var mapContext = mapCanvas.getContext('2d');
+    Array.prototype.forEach.call(document.querySelectorAll('.ol-layer canvas'), function(canvas) {
+      if (canvas.width > 0) {
+        var opacity = canvas.parentNode.style.opacity;
+        mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+        var transform = canvas.style.transform;
+        // Get the transform parameters from the style's transform matrix
+        var matrix = transform.match(/^matrix\(([^\(]*)\)$/)[1].split(',').map(Number);
+        // Apply the transform to the export map context
+        CanvasRenderingContext2D.prototype.setTransform.apply(mapContext, matrix);
+        mapContext.drawImage(canvas, 0, 0);
+      }
     });
+    var pdf = new jsPDF('landscape', undefined, format);
+    pdf.addImage(mapCanvas.toDataURL('image/jpeg'), 'JPEG', 0, 0, 420, 297);
+    pdf.save('map.pdf');
+    // Reset original map size
+    map.setSize(size);
+    map.getView().setResolution(viewResolution);
+    exportButton.disabled = false;
+    document.body.style.cursor = 'auto';
+  });
 
-    // Set print size
-    var printSize = [width, height];
-    map.setSize(printSize);
-    var scaling = Math.min(width / size[0], height / size[1]);
-    map.getView().setResolution(viewResolution / scaling);
- },
-  false
-);
+  // Set print size
+  var printSize = [width, height];
+  map.setSize(printSize);
+  var scaling = Math.min(width / size[0], height / size[1]);
+  map.getView().setResolution(viewResolution / scaling);
+
+map.addControl(overviewMapControl);
+
+  }, false);
+
+printPDFNotinprocess = true;
 
 }
+
+
+
 
    var vectorSource_new = new VectorSource();
    var vectorLayer_new = new VectorLayer({
@@ -342,7 +536,9 @@ map.on('click', function(event) {
 
 		// alert("left and up fractions: " + pixels_left_percent + ", " + pixels_up_percent);
 
-	document.getElementById('showmaplocationinfo').innerHTML = "Switching to Explore Georeferenced Maps viewer...";
+jQuery("#showmaplocationinfo").show();
+
+	document.getElementById('showmaplocationinfo').innerHTML = "Switching to <em>Explore Georeferenced Maps</em> viewer... please wait";
 
 	var pageurl = window.location.pathname;
 
@@ -381,7 +577,7 @@ map.on('click', function(event) {
 	{	var TypeName = 'OS_6inch_all_find'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey maps</a>&gt; <a href="/os/half-inch-mot-roads/">Half-inch MoT road maps (1923)</a>')
 	{	var TypeName = 'os_half_inch'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/25k-gb-1937-61/">1:25,000 maps of Great Britain, 1937-1961</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/25k-gb-1937-61/">1:25,000 maps of Great Britain, 1945-1969</a>')
 	{	var TypeName = 'OS_25000_uk'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/25k-gb-admin/">1:25,000 Administrative Area Series of Great Britain, 1945-1968</a>')
 	{	var TypeName = 'OS_25000_uk'; }
@@ -395,30 +591,58 @@ map.on('click', function(event) {
 	{	var TypeName = 'One_Inch_land_utilisation_scot'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/soils/">Soil Survey of Scotland, 1950s-1980s</a>')
 	{	var TypeName = 'Soil_Survey'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/half-inch-layers/">Ordnance Survey Scotland, Half-Inch to the mile, 1908-1918 (layer-coloured)</a>')
+	{	var TypeName = 'os_half_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/half-inch-hills/">Ordnance Survey Scotland, Half-Inch to the mile, 1908-1918 (hill-shaded)</a>')
+	{	var TypeName = 'os_half_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey maps</a>&gt; <a href="/os/half-inch-mot-roads/">Half-inch MoT road maps (1923)</a>')
+	{	var TypeName = 'os_half_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/german-army-100k/">German Army, Karte von Schottland, 1:100,000 - 1939-40</a>')
+	{	var TypeName = 'os_half_inch'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/ten-mile/">Ten-mile to the Inch, Planning Maps</a>')
 	{	var TypeName = 'OS_ten_mile_planning'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/london-1890s/">OS London, Five feet to the Mile, 1893-1896</a>')
 	{	var TypeName = 'os_london_1056'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/air-photos/">Air Photo Mosaics of Scotland, 1944-1950</a>')
 	{	var TypeName = 'catalog_air_photos'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/quarter-inch/">OS Quarter Inch to the Mile Maps of Scotland, 1921-1923</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/quarter-inch-first/">OS Quarter Inch to the Mile Maps of Scotland, 1st edition - 1901-1914</a>')
+	{	var TypeName = 'os_quarter_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/quarter-inch-third/">OS Quarter Inch to the Mile Maps of Scotland, 3rd edition, 1921-1923</a>')
 	{	var TypeName = 'os_quarter_inch'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/county-series/">OS Indexes to the County Series maps, Scotland, 1854-1886</a>')
 	{	var TypeName = 'os_indexes'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_england.html">Bartholomew\'s "Half Inch Maps" of England and Wales, 1902-1906</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_england.html">Bartholomew "Half Inch Maps" of England and Wales, 1902-1906</a>')
 	{	var TypeName = 'bart_half_combined'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_england_wales_halfinch_list.html">Bartholomew\'s "Half Inch Maps" of England and Wales, 1919-1924</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_england_wales_halfinch_list.html">Bartholomew "Half Inch Maps" of England and Wales, 1919-1924</a>')
 	{	var TypeName = 'bart_half_combined'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_scotland.html">Bartholomew\'s "Half Inch to the Mile Maps" of Scotland, 1899-1905</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_scotland.html">Bartholomew "Half Inch to the Mile Maps" of Scotland, 1899-1905</a>')
 	{	var TypeName = 'bart_half_combined'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_scotland_halfinch_list.html">Bartholomew\'s "Half Inch to the Mile Maps" of Scotland, 1926-1935</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_scotland_halfinch_list.html">Bartholomew "Half Inch to the Mile Maps" of Scotland, 1926-1935</a>')
 	{	var TypeName = 'bart_half_combined'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_great_britain.html">Bartholomew Revised Half-Inch Map, Great Britain, 1940-47</a>')
+	{	var TypeName = 'bart_half_combined'; }	
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/ww1/trenches/">British First World War Trench Maps, 1915-1918</a>')
 	{	var TypeName = 'TM_Combined_sorted_27700'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/geological/6inch/">Geological Survey, Six-Inch to the Mile, 1st edition</a>')
 	{	var TypeName = 'geol_sixinch'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/geological/one-inch/">Geological Survey, One-Inch Maps, 1850s-1940s</a>')
 	{	var TypeName = 'geol_sixinch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/geological/6inch/">Geological Survey, Six-Inch to the Mile, 2nd and later editions</a>')
+	{	var TypeName = 'geol_sixinch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/towns/">Town plans</a> &gt; <a href="/towns/goad/">Charles Goad Fire Insurance Plans, 1880s-1940s</a>')
+	{	var TypeName = 'Goad_Insurance_Plans'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/india/survey-of-india">Survey of India maps</a>')
+	{	var TypeName = 'Survey_of_India_Sheet_58'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/johnston-reduced-ordnance/">Johnston reduced Ordnance maps of Scotland, 1888-1896</a>')
+	{	var TypeName = 'Johnston_Scotland_half'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/johnston-three-miles-to-inch/">Johnston "Three miles to inch" map of Scotland, 1885-1912</a>')
+	{	var TypeName = 'Johnston_Scotland'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/bart_quarter_scotland.html">Bartholomew Quarter-inch to mile map of Scotland, 1911-1932</a>')
+	{	var TypeName = 'bart_half_combined'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/bart_half_scotland_1886.html">Bartholomew Reduced Ordnance Maps of Scotland, 1875-1891</a>')
+	{	var TypeName = 'bart_half_combined'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/gall_and_inglis.html">Gall and Inglis graded road maps of Scotland, 1900s-1930s</a>')
+	{	var TypeName = 'Gall_and_Inglis'; }
 	else
 	{
 	var TypeName = 'OS_one_inch_combined';
@@ -477,7 +701,25 @@ map.on('click', function(event) {
 		  var features = new GeoJSON().readFeatures(json);
 		  vectorSource.addFeatures(features);
 
-		if (features.length > 0)
+
+		if (features.length < 1)
+
+	{
+
+		document.getElementById('showmaplocationinfo').innerHTML = "Sorry, couldn't locate this map"; 
+		if (map.getLayers().getArray()[1].getSource().getFeatures().length > 0)
+				{map.getLayers().getArray()[1].getSource().clear(); }
+
+		setTimeout( function(){
+			document.getElementById("showmaplocationinfo").innerHTML = "";
+			jQuery("#showmaplocationinfo").hide();
+
+		}, 1500); // delay 1000 ms
+		return;
+	}
+
+
+		else if (features.length > 0)
 
 		{
 
@@ -502,17 +744,22 @@ map.on('click', function(event) {
 			var zoom = '15';
 
 	  if (group == 8) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=7&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-     	  else if (group == 11) { window.location = "https:&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+     	  else if (group == 11) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=9&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+     	  else if ((group == 14) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/25k-gb-1940-43/">War Office, Great Britain 1:25,000. GSGS 3906 - 1940-43</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=195&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+     	  else if ((group == 14) && (document.getElementById('URHere').innerHTML !== '<a href="/">Maps home</a> &gt; <a href="/os/25k-gb-1940-43/">War Office, Great Britain 1:25,000. GSGS 3906 - 1940-43</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=10&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
      	  else if (group == 22) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=7&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
      	  else if (group == 22) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=7&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
      	  else if (group == 31) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=9&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
      	  else if (group == 32 && y.toFixed(4) > 56) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=195&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
      	  else if (group == 32 && y.toFixed(4) < 56) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=10&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 33) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=168&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-          else if (group == 34) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=168&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 34) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=156&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 35) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=171&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 36) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=6&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-          else if (group == 37) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=2&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 37) { window.location = "https://maps.nls.uk/geo/explore/#zoom=5&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4)  + "&layers=10gen"; }
+          else if (group == 38) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=163&zoom="  + zoom +  "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4)  + "&layers=10gen"; }
           else if (group == 40) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=164&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 43) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=165&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 44) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=162&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
@@ -521,31 +768,65 @@ map.on('click', function(event) {
           else if (group == 56) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=2&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 57) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=163&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 59) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=171&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 60) { window.location = "https://maps.nls.uk/geo/explore/#zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4) + "&layers=" + pageURL; }
           else if (group == 61 && y.toFixed(4) > 55) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=170&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 61 && y.toFixed(4) < 55) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=193&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 64) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=176&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-         else if (group == 65) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=174&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-         else if (group == 66) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=177&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-         else if (group == 69) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=107116239&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-         else if (group == 70) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=117746211&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 65) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=174&zoom=12&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 66) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=177&zoom=12&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 69) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=107116239&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 70) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=117746211&zoom=17&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 77) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=180&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 79) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=190&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-          else if (group == 80) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=191&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-          else if (group == 83) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=196&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 80) && (document.getElementById('URHere').innerHTML !== '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey maps</a>&gt; <a href="/os/half-inch-mot-roads/">Half-inch MoT road maps (1923)</a>'))
+		 { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=191&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 83) && (document.getElementById('URHere').innerHTML !== '<a href="/">Maps home</a> &gt; <a href="/geological/one-inch/">Geological Survey, One-Inch Maps, 1850s-1940s</a>'))
+		 { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=197&zoom=12&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 83) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/geological/one-inch/">Geological Survey, One-Inch Maps, 1850s-1940s</a>'))
+		 { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=196&zoom=12&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 84) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=168&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 101) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=168&zoom=17" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
-          else if (group == 102) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=171&zoom=15" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 102) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/6inch/">Six-inch 1st edition, 1843-1882</a>')) 
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=5&zoom=15" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 102) && (document.getElementById('URHere').innerHTML !== '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/6inch/">Six-inch 1st edition, 1843-1882</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=171&zoom=15" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/one-inch-rev-new-series/">OS One-Inch to the mile, England and Wales, Revised New Series</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=160&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/one-inch-popular/">OS One-inch "Popular" edition, Scotland, 1921-1930</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=164&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href=\"/index.html\">Maps home</a> \> <a href=\"/os/one-inch-popular-outline/\">OS One-Inch Popular (Outline), 1921-1930</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=199&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href=\"/index.html\">Maps home</a> \> <a href=\"/os/one-inch-popular-3908/\">One-Inch Popular, GSGS 3908, 1940-43</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=198&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/one-inch-popular-nat-grid/">One-inch Popular, 1945-1947</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=2&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/one-inch-popular-nat-grid-outline/">OS Scotland One-Inch Popular with National Grid (Outline), 1945-7</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=200&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/one-inch-seventh-series/">One-inch to the mile, 7th Series, 1952-1961</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=11&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href=\"/index.html\">Maps home</a> \> <a href=\"/geological/one-inch/\">Geological Survey, One-Inch Maps, 1850s-1940s</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=196&zoom=11" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/one-inch-new-popular/">OS One-inch England and Wales, New Popular Edition, 1945-1947</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=12&zoom=11" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if ((group == 103) && (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/one-inch-3rd-colour/">OS One-inch 3rd ed (coloured) (1902-23)</a>'))
+		{ window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=102&zoom=11" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
           else if (group == 103) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=160&zoom=12" + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 108) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=204&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 109) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=203&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 113) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=208&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 118) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=208&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 120) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=156&zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 123) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=156&zoom=11&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+          else if (group == 124) { window.location = "https://maps.nls.uk/openlayers.cfm?m=1&id=156&zoom=11&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
+
+
 	else {
 	window.location = "https://" + window.location.hostname + "/geo/explore/#zoom=" + zoom + "&lat=" + y.toFixed(4) + "&lon=" + x.toFixed(4); }
 
 
 		}
 
-			else
-
-		{ document.getElementById('showmaplocationinfo').innerHTML = "Sorry, couldn't locate this map"; }
-
-		
+	
 
 //		  map.getView().fit(vectorSource.getExtent());
 
@@ -557,11 +838,7 @@ map.on('click', function(event) {
 
 	}
 
-	else
 
-	{
-	return;
-	}
 
 });
 
@@ -573,7 +850,9 @@ if(showMapLocationInput){
 showMapLocationInput.addEventListener('click', function() {
 
 
-	document.getElementById('showmaplocationinfo').innerHTML = "Switching to Find by Place viewer...";
+jQuery("#showmaplocationinfo").show();
+
+	document.getElementById('showmaplocationinfo').innerHTML = "Switching to <em>Find by Place</em> viewer... please wait";
 
 	var pageurl = window.location.pathname;
 
@@ -626,23 +905,35 @@ showMapLocationInput.addEventListener('click', function() {
 	{	var TypeName = 'One_Inch_land_utilisation_scot'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/soils/">Soil Survey of Scotland, 1950s-1980s</a>')
 	{	var TypeName = 'Soil_Survey'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/half-inch-layers/">Ordnance Survey Scotland, Half-Inch to the mile, 1908-1918 (layer-coloured)</a>')
+	{	var TypeName = 'os_half_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/half-inch-hills/">Ordnance Survey Scotland, Half-Inch to the mile, 1908-1918 (hill-shaded)</a>')
+	{	var TypeName = 'os_half_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey maps</a>&gt; <a href="/os/half-inch-mot-roads/">Half-inch MoT road maps (1923)</a>')
+	{	var TypeName = 'os_half_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/german-army-100k/">German Army, Karte von Schottland, 1:100,000 - 1939-40</a>')
+	{	var TypeName = 'os_half_inch'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/ten-mile/">Ten-mile to the Inch, Planning Maps</a>')
 	{	var TypeName = 'OS_ten_mile_planning'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/london-1890s/">OS London, Five feet to the Mile, 1893-1896</a>')
 	{	var TypeName = 'os_london_1056'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/">Ordnance Survey</a> &gt; <a href="/os/air-photos/">Air Photo Mosaics of Scotland, 1944-1950</a>')
 	{	var TypeName = 'catalog_air_photos'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/quarter-inch/">OS Quarter Inch to the Mile Maps of Scotland, 1921-1923</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/quarter-inch-first/">OS Quarter Inch to the Mile Maps of Scotland, 1st edition - 1901-1914</a>')
+	{	var TypeName = 'os_quarter_inch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/quarter-inch-third/">OS Quarter Inch to the Mile Maps of Scotland, 3rd edition, 1921-1923</a>')
 	{	var TypeName = 'os_quarter_inch'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/os/county-series/">OS Indexes to the County Series maps, Scotland, 1854-1886</a>')
 	{	var TypeName = 'os_indexes'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_england.html">Bartholomew\'s "Half Inch Maps" of England and Wales, 1902-1906</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_england.html">Bartholomew "Half Inch Maps" of England and Wales, 1902-1906</a>')
 	{	var TypeName = 'bart_half_combined'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_england_wales_halfinch_list.html">Bartholomew\'s "Half Inch Maps" of England and Wales, 1919-1924</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_england_wales_halfinch_list.html">Bartholomew "Half Inch Maps" of England and Wales, 1919-1924</a>')
 	{	var TypeName = 'bart_half_combined'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_scotland.html">Bartholomew\'s "Half Inch to the Mile Maps" of Scotland, 1899-1905</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_scotland.html">Bartholomew "Half Inch to the Mile Maps" of Scotland, 1899-1905</a>')
 	{	var TypeName = 'bart_half_combined'; }
-	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_scotland_halfinch_list.html">Bartholomew\'s "Half Inch to the Mile Maps" of Scotland, 1926-1935</a>')
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_scotland_halfinch_list.html">Bartholomew "Half Inch to the Mile Maps" of Scotland, 1926-1935</a>')
+	{	var TypeName = 'bart_half_combined'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/bart_half_great_britain.html">Bartholomew Revised Half-Inch Map, Great Britain, 1940-47</a>')
 	{	var TypeName = 'bart_half_combined'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/ww1/trenches/">British First World War Trench Maps, 1915-1918</a>')
 	{	var TypeName = 'TM_Combined_sorted_27700'; }
@@ -650,20 +941,34 @@ showMapLocationInput.addEventListener('click', function() {
 	{	var TypeName = 'geol_sixinch'; }
 	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/geological/one-inch/">Geological Survey, One-Inch Maps, 1850s-1940s</a>')
 	{	var TypeName = 'geol_sixinch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/geological/6inch/">Geological Survey, Six-Inch to the Mile, 2nd and later editions</a>')
+	{	var TypeName = 'geol_sixinch'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/towns/">Town plans</a> &gt; <a href="/towns/goad/">Charles Goad Fire Insurance Plans, 1880s-1940s</a>')
+	{	var TypeName = 'Goad_Insurance_Plans'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/india/survey-of-india">Survey of India maps</a>')
+	{	var TypeName = 'Survey_of_India_Sheet_58'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/johnston-reduced-ordnance/">Johnston reduced Ordnance maps of Scotland, 1888-1896</a>')
+	{	var TypeName = 'Johnston_Scotland_half'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/johnston-three-miles-to-inch/">Johnston "Three miles to inch" map of Scotland, 1885-1912</a>')
+	{	var TypeName = 'Johnston_Scotland'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/bart_quarter_scotland.html">Bartholomew Quarter-inch to mile map of Scotland, 1911-1932</a>')
+	{	var TypeName = 'bart_half_combined'; }
+	else if (document.getElementById('URHere').innerHTML == '<a href="/">Maps home</a> &gt; <a href="/series/">Series maps</a> &gt; <a href="/series/gall_and_inglis.html">Gall and Inglis graded road maps of Scotland, 1900s-1930s</a>')
+	{	var TypeName = 'Gall_and_Inglis'; }
 	else
 	{
 	var TypeName = 'OS_one_inch_combined';
 	}
 
 
-//	alert(TypeName);
 
 	var urlgeoserver =  'https://geoserver3.nls.uk/geoserver/wfs?service=WFS' + 
 	 			'&version=2.0.0&request=GetFeature&typename=' + TypeName +
 				'&PropertyName=(the_geom,GROUP,IMAGE,IMAGETHUMB,IMAGEURL,SHEET,DATES,YEAR)&outputFormat=text/javascript&format_options=callback:loadFeatures' +
 				'&srsname=EPSG:900913&CQL_FILTER=IMAGE=' + pageURL;
 
-		
+
+
 		var geojsonFormat = new GeoJSON();
 
 		var url = urlgeoserver;
@@ -733,7 +1038,17 @@ showMapLocationInput.addEventListener('click', function() {
 
 			else
 
-		{ document.getElementById('showmaplocationinfo').innerHTML = "Sorry, couldn't locate this map"; }
+
+
+		{ 
+		document.getElementById('showmaplocationinfo').innerHTML = "Sorry, couldn't locate this map"; 
+		setTimeout( function(){
+			document.getElementById("showmaplocationinfo").innerHTML = "";
+			jQuery("#showmaplocationinfo").hide();
+
+		}, 1500); // delay 1000 ms
+		return;
+		}
 
 		
 
@@ -747,7 +1062,5 @@ showMapLocationInput.addEventListener('click', function() {
 
 
        }
-
-
 
 
