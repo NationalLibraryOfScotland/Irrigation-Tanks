@@ -7,5 +7,6 @@ The additional functions inlcude:
 - a customised Permalink function "Link to this view" based on OpenLayers2 format, and used in existing links.
 - allowing a PDF Print function, based on the <a href="https://openlayers.org/en/latest/examples/export-pdf.html?q=PDF"> OpenLayers Export PDF example</a>.
 - allowing a 'Zoom to this location' function, based on a Web Feature Service request to the map metadata.
+- incorporating drawing tools for map annotation
 
 The finished viewer can be viewed on the <a href="https://maps.nls.uk/view/00000207">NLS website</a>.
