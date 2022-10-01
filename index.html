@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		<title>Irrigation tanks in the Kaveri River Delta, South India - Charlotte Evans research - University of Lancaster - National Library of Scotland</title>
+		<!-- css for Bootstrap transparency slider -->
+    		<link type="text/css" rel="stylesheet" href="css/bootstrap-slider.css" />
+		<!-- specific css to this map -->
+		<link type="text/css" rel="stylesheet" href="css/maincss.css" media="screen" /> 
+		<!-- OpenLayers css -->
+		<link type="text/css" rel="stylesheet" href="css/ol.css" media="screen" /> 
+		<!-- Fancybox style sheet - for opening popup -->
+		<link type="text/css" rel="stylesheet" href="https://maps.nls.uk/assets/css/jquery.fancybox.css" />
+
+	</head>
+	<body>
+
+	    <div id="header">
+
+
+		<div id="logo">
+
+			
+			<a href="http://maps.nls.uk/"><img id="nls" src="img/nls-logo.jpg" alt="National Library of Scotland" /></a>
+
+			<a href="https://www.lancaster.ac.uk/"><img id="lancaster" src="img/lancaster-logo.png" alt="Lancaster University" /></a>
+			
+			<a href="https://nwssdtp.ac.uk/"><img id="nwssdtp" src="img/wssdtplogo.png" alt="North West Social Science Doctoral Training Partnership" /></a>
+			
+		</div>
+
+		<div id="headertitle">	<h2>Irrigation tanks in the Kaveri River Delta, South India</h2>
+	    	</div>
+
+			<div id="headerlinks">
+	
+				<p><strong>Map</strong>  &nbsp; &nbsp;   <a href="about.html">About</a></p>
+
+	
+			</div>
+
+	    </div>
+
+		<div id="searchSideBar">		<form><select id="SelectLeft" onchange="changemapleft(this.selectedIndex)"></select></form>
+			<form><select id="SelectRight" onchange="changemapright(this.selectedIndex)"></select></form>
+		</div>
+
+		<div id="surveyofindialink">&nbsp;<a href="javascript:viewsurveyofindia()">View Survey of India maps</a>&nbsp;</div>
+
+
+		<button id="show">Show Key</button>
+
+	        <div id="sidebar">
+
+	                <button type="button" id="hidekey" class="close"  aria-label="Close">
+	                  <span aria-hidden="true">&times;</span>
+	                </button>
+
+			<h3>Map Key</h3>
+
+			<table>
+			<tr><td><span style="color:#280ec2;">Water tanks</span></td><td><div id="circle" class="horizontal_blue_line"></div></td><td><div class="onoffswitch">
+			    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" />
+			    <label class="onoffswitch-label" for="myonoffswitch">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div></td></tr>
+			<tr><td><span style="color:#5897a6;">Canals</span></td><td><div id="circle1" class="horizontal_light_blue_line"></div></td><td><div class="onoffswitch-canals">
+			    <input type="checkbox" name="onoffswitch-canals" class="onoffswitch-checkbox-canals" id="myonoffswitch-canals" tabindex="0" />
+			    <label class="onoffswitch-label" for="myonoffswitch-canals">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div></td></tr>
+			<tr><td>Railways</td><td><div id="circle2" class="horizontal_dashed_line"></div></td><td><div class="onoffswitch-railways">
+			    <input type="checkbox" name="onoffswitch-railways" class="onoffswitch-checkbox-railways" id="myonoffswitch-railways" tabindex="0" />
+			    <label class="onoffswitch-label" for="myonoffswitch-railways">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div></td></tr> 
+			<tr><td><span style="color:#006400;">Thanjavur District Boundary</span></td><td><div id="circle3" class="horizontal_green_line"></div></td><td><div class="onoffswitch-boundaries">
+			    <input type="checkbox" name="onoffswitch-boundaries" class="onoffswitch-checkbox-boundaries" id="myonoffswitch-boundaries" tabindex="0" />
+			    <label class="onoffswitch-label" for="myonoffswitch-boundaries">
+			        <span class="onoffswitch-inner"></span>
+			        <span class="onoffswitch-switch"></span>
+			    </label>
+			</div></td></tr>
+			</table>
+
+			<h3>Change transparency of water tanks:</h3>
+      			<p class="infomapslider">
+			<br/>
+        		<input id="mapslider" data-slider-id="mapsslider" type="text" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="100" />
+      			</p> 
+
+	    </div>
+
+	    <div id="mapleft"></div>
+	    <div id="mapright"><div id="scalebar"></div></div>
+
+
+	<a id="autoStart" style="display:none" href="#data"   title="Irrigation tanks in the Kaveri River Delta, South India - Initial Help Instructions"></a>
+	           <div style="display: none;">
+	       <div id="data" >
+		  <br/>
+
+
+	           <h2>Irrigation tanks in the Kaveri River Delta, South India</h2>
+	
+	
+	           <p>This application allows water tanks and related information relating to the Kaveri River Delta to be viewed.</p>
+	
+	           <h3>Please read the <strong>About</strong> to the upper right for further information. </h3>
+	
+	     
+	         <p>Click the cross (top right) to close this window.</p>
+	     
+	         <p>
+	         <a id="noShow" href="javascript:dontShow()">Don't show this message again</a>
+	         </p>
+	        </div>
+	     </div>
+
+
+
+
+
+		<!-- JQuery Javascript -->
+		
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+	        <script type="text/javascript" src="https://maps.nls.uk/assets/scripts/jquery.fancybox.min.js"></script>
+           	<script type="text/javascript" src="https://maps.nls.uk/assets/scripts/jquery.cookie.min.js"></script>
+
+		<!-- proj4 Javascript for projection information -->
+		
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.5.0/proj4.js"></script>
+
+		<!-- EPSG:2193 - New Zealand Transverse Mercator coordinate informaiton -->
+		
+		<script type="text/javascript" src="https://epsg.io/2193.js"></script>
+		
+		<!-- OpenLayers Javascript - use ol-debug.js for debugging and ol.js for releasing when finished -->
+
+	        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.js"></script>
+
+		<!-- Bootstrap slider Javascript -->
+
+    		<script type="text/javascript" src="scripts/bootstrap-slider.js"></script>
+
+		<!-- Our specific Javascript for this map -->
+
+                <script type="text/javascript" src="scripts/sidebyside.js"></script> 
+
+		<script type="text/javascript">
+	
+	
+			    function openFancy(){ 
+			           setTimeout( function() {$('#autoStart').trigger('click'); },500); // show after a half-second
+			           } 
+			
+			           // create cookie on button click
+			           function dontShow(){
+			           $.fancybox.close(); // optional
+			           $.cookie('Kaveri-visited', 'yes', { expires: 80 }); // expiration in 80 days
+			           }
+			
+			     $(document).ready(function() {
+			               var visited = $.cookie('Kaveri-visited'); // create cookie 'visited' with no value
+			               if (visited == 'yes') {
+			                   return false;
+			               } else {
+			                   openFancy(); // cookie has no value so launch fancybox on page load
+			
+			               }
+			           $('#autoStart').fancybox({
+			                closeClickOutside : true,
+			                onComplete: function() {
+			                if(history.pushState) {
+			                    history.pushState(null, null, '#');
+			                     }
+			                     else {
+			                         location.hash = '#';
+			                     }
+			               }
+			           });
+			     });
+	
+	            jQuery("#show").hide();
+	
+
+		    jQuery("#hidekey").click(function(){
+	        	jQuery("#show").show();
+		        jQuery("#sidebar").hide();
+		    });
+
+		    jQuery("#show").click(function(){
+		        jQuery("#sidebar").show();
+		        jQuery("#show").hide();
+		    });
+
+		</script>
+
+	</body>
+</html>
+
