@@ -1,0 +1,377 @@
+/* CSS full-screen layout - site specific elements */
+
+html { overflow: hidden; }
+body { overflow: hidden; padding: 0; margin: 0; width: 100%; height: 100%; font-family: Trebuchet MS, Trebuchet, Arial, sans-serif; background: #FFFFFF;}
+h1 {  margin:0; font-size: 1.3em; line-height:1.2em; }
+h2 {  margin:0; font-size: 1.2em; }
+h3 {	font-size: 1.1em; margin-top:1em; border-bottom: 1px solid #ccc;}
+h4 {	font-size: 0.85em;}
+h5 {	padding:7px 10px; margin:0; font-size: 1.0em;}
+label { font-size: 0.9em;}
+
+
+@media only screen and (min-width: 50em) {
+	h5 {	padding:7px 10px; margin:0; font-size: 1.0em;}
+}
+
+@media only screen and (max-width: 50em) {
+	h5 {	display: none; }
+}
+
+		@media only screen and (min-width: 80em) {
+			#header { position: absolute; top: 10px; left: 10px; right: 10px; height: 80px; overflow: hidden;  background: #fff; background-image: url('../img/header-graphic.png'); 
+background-repeat:no-repeat; background-opacity:0.5; background-position:right top; box-shadow: 0 1px 3px #ccc; border: 1px solid #ccc; }
+		}
+
+		@media only screen and (max-width: 80em) {
+			#header { position: absolute; top: 10px; left: 10px; right: 10px; height: 80px; overflow: hidden;  background: #fff;  background-image: url('../img/none.png'); 
+background-repeat:no-repeat; background-position:right top; box-shadow: 0 1px 3px #ccc; border: 1px solid #ccc; }
+		}
+
+
+#home { position: absolute; top: 10px; left: 10px; z-index: 5;} 
+
+
+		@media only screen and (min-width: 60em) {
+			#headertitle { position: absolute; top: 6px; margin: 10px 20px 60px 650px; max-width: 300px; overflow: hidden; text-align:center; } 
+		}
+
+		@media only screen and (max-width: 60em) {
+			#headertitle { position: absolute; top: 6px; margin: 10px 100px 60px 200px; max-width: 300px;  width: 50%; text-align: center; } 
+		}
+
+
+@media only screen and (min-width: 60em) {
+	#headerlinks { position: absolute; top: 26px; width: 800px; right: 5px; font-size: 1.1em;  line-height: 120%; padding: 10px 5px; 0px 10px; text-align: right; }
+}
+
+@media only screen and (max-width: 60em) {
+	#headerlinks { position: absolute; top: 42px; right: 5px; font-size: 1.0em;  line-height: 100%; overflow: hidden; padding: 2px 5px; 0px 5px; text-align: right; }
+}
+
+#main { position: absolute; top: 100px; left: 10px; right: 10px; bottom: 10px; overflow: auto; border: 1px solid #592F57; border-radius: 8px; box-shadow: 0 0px 0px #CCC; 
+padding: 10px 10px 10px 10px; background: #fff; z-index: 10001;}
+
+.floatright {float:right;margin-left: 22px;margin-bottom: 20px;background:#ffffff;}
+ 
+
+#map { position: absolute; top: 100px; left: 10px; right: 10px; bottom:10px; overflow: hidden; border: 1px solid #ccc; box-shadow: 0 0px 0px #CCC; background-color: #cedfe4;} 
+
+#layerSelect { position: absolute; top: 10px; left: 300px; z-index: 1;}
+
+
+
+#sidebar { position: absolute; bottom: 50px; left: 20px; width: 220px; font-size: 13px; border: 1px solid #592F57; border-radius: 8px; box-shadow: 0 0px 0px #CCC; 
+padding: 10px 10px 10px 10px; background: #fff; z-index: 1;}
+
+#searchSideBar { position: absolute; top: 110px; left: 10px; right: 10px; margin-bottom:5px; height: 20px; z-index: 10001; }
+#SelectLeft {  position: absolute;   left: 5%; }
+#SelectRight { position: absolute;   left: 55%; }
+
+@media only screen and (min-width: 80em) {
+	#surveyofindialink { position: absolute; top: 110px; left: 35%; margin-bottom:5px; height: 20px; z-index: 10001;   background-color: #FFF; opacity:0.8;}
+}
+
+
+@media only screen and (max-width: 80em) {
+	#surveyofindialink { visibility: hidden; }
+}
+
+#mapleft { position: absolute; left: 10px; right: 50.2%; top: 100px; bottom: 10px; border: 1px solid #ccc;}
+#mapright { position: absolute; left: 50.2%; right: 10px; top: 100px; bottom: 10px; border: 1px solid #ccc;}
+
+#scalebar {position: absolute; right: 20px; bottom: 75px; z-index: 10001; font-size: small;}
+
+#resultsSideBar {position: absolute;top: 110px;	border-radius: 5px;right: 55px;width: 150px;  font-size: 10pt; overflow: hidden; z-index: 2; background-color: white; overflow: auto;margin: 0px;padding: 10px;
+background:rgba(255,255,255,0.95);}
+
+.mslider {  width: 100%;  background: #FFFFFF;  position:absolute;  bottom: 20px;  opacity: 0.8;  z-index: 10000000;}
+
+#mapslider .slider-selection {  background: white;  padding-left: 20px;}
+
+#slider-range {width: 200px; margin:5px;}
+
+#measurementControlForm {position: absolute;right: 50px;top: 110px;z-index:100000;
+}
+
+#measurementControlOutput {display: none; position: absolute;right: 5px;	top: 158px; background-color: white;z-index:100000;font-size: 0.75em;
+	font-weight: bold;padding: 0 6px;border: 1px inset #ddd;text-align: right; opacity:0.6;	filter:alpha(opacity=60);}
+
+#measurementControlOutputReturnLink, #measurementControlOutputSpan {	display: block;}
+
+#measurementControlOutputSpan {	height: 1.7em;}
+
+#message { position: absolute; right: 200px; top: 110px; background-color: white;z-index:100000;font-size: 0.75em; 
+		font-weight: bold;padding: 0 6px;border: 1px inset #ddd;text-align: right; opacity:0.7;	filter:alpha(opacity=60);}
+
+/* OSMNames gazetteer search autocomplete css  */
+
+.ac-renderer{
+  position: absolute;
+  border: 1px solid #ccc;
+  margin-top: -1px;
+  max-width: 400px;
+  max-height: 400px; 
+  overflow: auto; 
+  font-size:.9em;
+  z-index: 2;
+}
+.ac-row {
+  white-space: nowrap;
+  position: relative;
+  cursor: pointer;
+  padding: 5px;
+  background-color: #fff;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+}
+.ac-row .suffix {
+  font-size:.8em;
+  color:#ccc;
+  padding:.1em 0 .1em 5px;
+}
+.ac-row .type {
+  font-size:.7em;
+  color:#aaa;
+  display:block;
+  width:100%;
+}
+.ac-highlighted {font-weight: bold;}
+.ac-active {background-color: #eee;}
+
+
+		@media only screen and (max-width: 60em) {
+			#logo { display: none; }
+		}
+
+
+		@media only screen and (min-width: 60em) {
+			#logo {  left: 12px; top: 12px; height: 65px;  z-index: 100001; background-color: white; border-radius: 2px; display:inline-block;  overflow: hidden;}
+		}
+		
+		@media only screen and (min-width: 60em) {
+			#lancaster { margin:5px; width:auto; max-height:58px; max-width:180px;  middle; float:left; }
+		}
+		
+		@media only screen and (max-width: 60em) {
+			#lancaster { visibility: hidden;}
+		}
+		
+		@media only screen and (min-width: 60em) {
+			#nls { margin:5px; width:auto; max-height:60px;!important; float:left;!important; overflow: hidden;}
+		}
+		
+		@media only screen and (max-width: 60em) {
+			#nls { visibility: hidden;}
+		}
+		
+		@media only screen and (min-width: 60em) {
+			#nwssdtp { margin:5px; width:auto; max-height:60px;!important; float:left;!important; overflow: hidden;}
+		}
+		
+		@media only screen and (max-width: 60em) {
+			#nwssdtp { visibility: hidden; }
+		}
+
+
+		.circle {
+			border-radius: 50%;
+			display: inline-block;
+			margin-right: 10px;
+		}
+
+
+		.horizontal_blue_line {
+		  border-bottom: 3px solid #280ec2;
+		  width: 4px;
+		  padding-right: 25px;
+		  margin-left: 5px;
+		  margin-right: 5px;
+		} 
+
+		.horizontal_light_blue_line {
+		  border-bottom: 4px solid #5897a6;
+		  width: 4px;
+		  padding-right: 25px;
+		  margin-left: 5px;
+		  margin-right: 5px;
+		} 
+
+		.horizontal_green_line {
+		  border-bottom: 1px solid #006400;
+		  width: 1px;
+		  padding-right: 25px;
+		  margin-left: 5px;
+		  margin-right: 5px;
+		} 
+
+
+		.horizontal_dashed_line{
+		  border-bottom: 3px dashed grey;
+		  width: 4px;
+		  padding-right: 25px;
+		  margin-left: 5px;
+		  margin-right: 5px;
+		} 
+
+
+		.onoffswitch {
+		    position: relative; width: 50px; margin-top:3px;
+		    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+		}
+
+		.onoffswitch-canals {
+		    position: relative; width: 50px; margin-top:3px;
+		    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+		}
+
+		.onoffswitch-railways {
+		    position: relative; width: 50px; margin-top:3px;
+		    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+		}
+
+		.onoffswitch-boundaries {
+		    position: relative; width: 50px; margin-top:3px;
+		    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+		}
+
+		.onoffswitch-checkbox {
+		    position: absolute;
+		    opacity: 0;
+		    pointer-events: none;
+		}
+
+		.onoffswitch-checkbox-canals {
+		    position: absolute;
+		    opacity: 0;
+		    pointer-events: none;
+		}
+
+		.onoffswitch-checkbox-railways {
+		    position: absolute;
+		    opacity: 0;
+		    pointer-events: none;
+		}
+
+		.onoffswitch-checkbox-boundaries {
+		    position: absolute;
+		    opacity: 0;
+		    pointer-events: none;
+		}
+
+		.onoffswitch-label {
+		    display: block; overflow: hidden; cursor: pointer;
+		    border: 2px solid #170909; border-radius: 20px;
+		}
+		.onoffswitch-inner {
+		    display: block; width: 200%; margin-left: -100%;
+		    transition: margin 0.3s ease-in 0s;
+		}
+		.onoffswitch-inner:before, .onoffswitch-inner:after {
+		    display: block; float: left; width: 50%; height: 18px; padding: 0; line-height: 18px;
+		    font-size: 10px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+		    box-sizing: border-box;
+		}
+		.onoffswitch-inner:before {
+		    content: "ON";
+		    padding-left: 10px;
+		    background-color: #345AC2; color: #FFFFFF;
+		}
+		.onoffswitch-inner:after {
+		    content: "OFF";
+		    padding-right: 4px;
+		    background-color: #EEEEEE; color: #999999;
+		    text-align: right;
+		}
+
+
+
+
+		.onoffswitch-switch {
+		    display: block; width: 14px; margin: 3px;
+		    background: #FFFFFF;
+		    position: absolute; top: 0; bottom: 0;
+		    right: 26px;
+		    border: 2px solid #170909; border-radius: 20px;
+		    transition: all 0.3s ease-in 0s; 
+		}
+
+		.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+		    margin-left: 0;
+		}
+		.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+		    right: 0px; 
+		}
+
+		.onoffswitch-checkbox-canals:checked + .onoffswitch-label .onoffswitch-inner {
+		    margin-left: 0;
+		}
+		.onoffswitch-checkbox-canals:checked + .onoffswitch-label .onoffswitch-switch {
+		    right: 0px; 
+		}
+
+		.onoffswitch-checkbox-railways:checked + .onoffswitch-label .onoffswitch-inner {
+		    margin-left: 0;
+		}
+		.onoffswitch-checkbox-railways:checked + .onoffswitch-label .onoffswitch-switch {
+		    right: 0px; 
+		}
+
+		.onoffswitch-checkbox-boundaries:checked + .onoffswitch-label .onoffswitch-inner {
+		    margin-left: 0;
+		}
+		.onoffswitch-checkbox-boundaries:checked + .onoffswitch-label .onoffswitch-switch {
+		    right: 0px; 
+		}
+
+
+		#mainContentOuter {
+		    position: absolute; top: 100px; left: 10px; right: 10px; bottom: 10px; overflow: auto; 
+		    box-shadow: 0 1px 3px #ccc; border: 1px solid #ccc;
+		    background-color: white;
+		    background-image: url(https://maps.nls.uk/assets/graphics/check.png);
+		    border-bottom: 1px solid #ccc;
+		}
+		
+		#mainContent {
+		    position: absolute; top: 0px; left: 10px; right: 10px; bottom:0px; overflow: auto; 
+		    margin: 0 auto;
+		    max-width: 840px;
+		    padding: 15px 30px;
+		    background-color: white;
+		}
+
+		#mainContent p {
+			font-size: 1.0em;
+		}
+
+		.close {
+		    -webkit-appearance: none;
+		    padding: 0;
+		    cursor: pointer;
+		    background: 0 0;
+		    border: 0;
+		    float: right;
+		    font-size: 16pt;
+		    font-weight: 700;
+		    line-height: 1;
+		    color: #000;
+		    text-shadow: 0 1px 0 #fff;
+		    filter: alpha(opacity=20);
+		    opacity: .6;
+		}
+
+
+		#show {
+		    visibility: visible;
+		    position: absolute;
+		    bottom: 53px;
+		    left: 22px;
+		    z-index: 1000;
+		    font-size: 0.8em;
+		    text-decoration: underline;
+		    color: blue;
+		    background-color: white;
+		    padding: 5px 5px 5px 5px;
+		    border-radius: 6px;
+		}
