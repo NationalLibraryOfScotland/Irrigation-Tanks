@@ -7,7 +7,7 @@ The map viewer uses <a href="http://openlayers.org">OpenLayers</a> 4.6.5 for the
 The original viewer was adapted from the NLS <a href="https://github.com/NationalLibraryOfScotland/SidebySideOL3">Side-by-side viewer</a>.
 
 
-The <a href="https://github.com/NationalLibraryOfScotland/InnesJamaicaJournal/blob/main/scripts/index.js">sidebyside.js</a> Javascript file contains the bespoke functions for this viewer, and is commented to explain the specific content and functions within it.
+The <a href="https://github.com/NationalLibraryOfScotland/Irrigation-Tanks/tree/master/scripts/sidebyside.js">sidebyside.js</a> Javascript file contains the bespoke functions for this viewer, and is commented to explain the specific content and functions within it.
 
 View complete application: <a href="https://geo.nls.uk/maps/irrigation-tanks">Irrigation tanks in the Kaveri River Delta, South India
 </a>.
