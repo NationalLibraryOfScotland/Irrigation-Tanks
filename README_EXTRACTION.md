@@ -1,15 +1,19 @@
-# GeoJSON Extraction Guide
+# Accessing the Data
 
-Extract geographic data from the Irrigation Tanks web viewer into GIS-compatible formats (GeoJSON, KML) for use in QGIS, ArcGIS, Google Earth, and other mapping software.
+The geographic data behind this project — irrigation tank outlines, canals, railways, and the Thanjavur district boundary — is a resource for anyone who wants to study, analyse, or build upon the work of mapping water histories in the Kaveri river delta. This might include:
 
-## Overview
+- Overlaying the tank features on other historical or contemporary maps
+- Analysing changes in the landscape over time
+- Incorporating the data into your own research, visualisations, or applications
+- Comparing the mapped features with other environmental or demographic datasets
 
-This repository contains a web-based map viewer showing irrigation tanks in the Kaveri River Delta, South India. The geographic shapes are loaded dynamically from remote GeoJSON files hosted by the National Library of Scotland. These extraction scripts allow you to:
+The data is loaded dynamically by the web viewer from files hosted by the National Library of Scotland. This extraction pipeline gives you a straightforward way to download and work with that data directly, without needing to know how the web application works internally.
 
-- **Download** all geographic data from remote sources
-- **Validate** GeoJSON structure and coordinate accuracy
-- **Convert** to multiple formats (GeoJSON, KML)
-- **Import** into your preferred GIS software
+## What the pipeline does
+
+- **Download** all geographic datasets from the NLS server
+- **Validate** the downloaded files to confirm they are complete and correctly structured
+- **Convert** to common open formats (GeoJSON and KML) that can be opened in a wide range of tools
 
 ## Quick Start
 
