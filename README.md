@@ -11,3 +11,16 @@ The <a href="https://github.com/NationalLibraryOfScotland/Irrigation-Tanks/tree/
 
 View complete application: <a href="https://geo.nls.uk/maps/irrigation-tanks">Irrigation tanks in the Kaveri River Delta, South India
 </a>.
+
+## Data Extraction for GIS Research
+
+For researchers and students who want to use the geographic data (irrigation tanks, canals, railways, district boundary) in GIS software such as QGIS, ArcGIS, or Google Earth, this repository includes an automated extraction pipeline.
+
+A single command downloads and converts all datasets into GeoJSON and KML formats ready for import:
+
+```bash
+pip install -r scripts/requirements.txt
+python3 scripts/extract_all.py
+```
+
+See [README_EXTRACTION.md](README_EXTRACTION.md) for full instructions, including how to import the data into QGIS, ArcGIS Pro, and Google Earth.
