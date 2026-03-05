@@ -11,3 +11,16 @@ The <a href="https://github.com/NationalLibraryOfScotland/Irrigation-Tanks/tree/
 
 View complete application: <a href="https://geo.nls.uk/maps/irrigation-tanks">Irrigation tanks in the Kaveri River Delta, South India
 </a>.
+
+## Using the Data
+
+The geographic data behind this viewer — irrigation tank outlines, canals, railways, and the Thanjavur district boundary — is a valuable resource for anyone studying the water histories, landscapes, and changing environment of the Kaveri river delta. Whether you are a researcher, student, or developer looking to build on this work, this repository includes an extraction pipeline so you can easily obtain the data in a form you can work with directly.
+
+A single command downloads all datasets and converts them into standard open formats (GeoJSON and KML):
+
+```bash
+pip install -r scripts/requirements.txt
+python3 scripts/extract_all.py
+```
+
+See [README_EXTRACTION.md](README_EXTRACTION.md) for full instructions, including format details and how to import into common tools.
